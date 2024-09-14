@@ -20,8 +20,10 @@ def fetch_post_by_id(post_id, data=POSTS):
             return post
 
 
-def validate_post_data(data=POSTS):
-    return 'title' in data and bool(data['title']) and 'content' in data and bool(data['content'])
+def validate_post_data(data):
+    fields = ['title', 'content']
+    errors = [f'{field} is missing' for field in fields if field not in data or not bool(data[field].strip())]
+    return (False, ", ".join(errors)) if bool(errors) else (True, data)
 
 
 @app.route('/api/posts', methods=['GET'])
@@ -31,9 +33,9 @@ def get_posts():
 
 @app.route('/api/posts', methods=['POST'])
 def add_post():
-    data = request.get_json()
-    if not validate_post_data(data):
-        return jsonify({'error': 'Bad request'}), 400
+    is_valid, data = validate_post_data(request.get_json())
+    if not is_valid:
+        return jsonify({'error': f'Bad request: {data}'}), 400
     data['id'] = generate_unique_id()
     POSTS.append(data)
     return jsonify(data), 201

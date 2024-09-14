@@ -11,11 +11,22 @@ POSTS = [
 
 
 def test_validate_post_data():
-    assert validate_post_data({'title': 'title', 'content': 'content'})
-    assert not validate_post_data({'titles': 'title', 'content': 'content'})
-    assert not validate_post_data({'title': 'title', 'contents': 'content'})
-    assert not validate_post_data({'title': '', 'content': 'content'})
-    assert not validate_post_data({'title': 'title', 'contents': ''})
+    assert validate_post_data({'title': '1', 'content': '2'})[0]
+    assert validate_post_data({'title': '1', 'content': '2'})[1] == {'title': '1', 'content': '2'}
+    assert not validate_post_data({'titles': '1', 'content': '2'})[0]
+    assert not validate_post_data({'title': '1', 'contents': '2'})[0]
+    assert not validate_post_data({'title': '', 'content': '2'})[0]
+    assert not validate_post_data({'title': '1', 'contents': ''})[0]
+    assert validate_post_data({'titles': '1', 'content': '2'})[1] == 'title is missing'
+    assert validate_post_data({'title': '', 'content': 'content'})[1] == 'title is missing'
+    assert validate_post_data({'title': '1', 'contente': '2'})[1] == 'content is missing'
+    assert validate_post_data({'title': '1', 'content': ''})[1] == 'content is missing'
+    assert validate_post_data({'title': '', 'content': ''})[1] == 'title is missing, content is missing'
+    assert validate_post_data({'titles': '1', 'contento': '2'})[1] == 'title is missing, content is missing'
+    assert validate_post_data({'title': '', 'contento': '2'})[1] == 'title is missing, content is missing'
+    assert validate_post_data({'titl': '1', 'content': ''})[1] == 'title is missing, content is missing'
+
+
 
 
 def test_generate_unique_id():
