@@ -35,10 +35,19 @@ def get_posts():
 def add_post():
     is_valid, data = validate_post_data(request.get_json())
     if not is_valid:
-        return jsonify({'error': f'Bad request: {data}'}), 400
+        return jsonify({'error': f'Bad request: {data}.'}), 400
     data['id'] = generate_unique_id()
     POSTS.append(data)
     return jsonify(data), 201
+
+
+@app.route('/api/posts/<int:post_id>', methods=['DELETE'])
+def delete_post(post_id):
+    post = fetch_post_by_id(post_id)
+    if not post:
+        return jsonify({'error': f'There is no post with id {post_id}.'}), 404
+    POSTS.remove(post)
+    return jsonify({'message': f'Post with id {post_id} has been deleted successfully.'}), 200
 
 
 if __name__ == '__main__':
