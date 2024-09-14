@@ -50,5 +50,22 @@ def delete_post(post_id):
     return jsonify({'message': f'Post with id {post_id} has been deleted successfully.'}), 200
 
 
+@app.route('/api/posts/<int:post_id>', methods=['PUT'])
+def update_post(post_id):
+    post = fetch_post_by_id(post_id)
+    if not post:
+        return jsonify({'error': f'post with id {post_id} not found.'}), 404
+    fields = ['title', 'content']
+    put_data = request.get_json()
+    for key in put_data.keys():
+        if key in fields:
+            for field in fields:
+                if put_data.get(field):
+                    post[field] = request.get_json()[field]
+            return jsonify(post), 200
+    return jsonify({'error': 'Bad request. Input JSON should contain one of the following fields: '
+                             f'{", ".join(fields)}'}), 400
+
+
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=5002, debug=True)
