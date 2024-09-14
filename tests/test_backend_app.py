@@ -3,20 +3,19 @@ from backend.backend_app import (validate_post_data,
                                  generate_unique_id,
                                  fetch_post_by_id)
 
-
 POSTS = [
-        {'id': 1, 'title': 'post one', 'content': '001'},
-        {'id': 2, 'title': 'post two', 'content': '002'},
-        {'id': 3, 'title': 'post tree', 'content': '003'}
-    ]
+    {'id': 1, 'title': 'post one', 'content': '001'},
+    {'id': 2, 'title': 'post two', 'content': '002'},
+    {'id': 3, 'title': 'post tree', 'content': '003'}
+]
 
 
 def test_validate_post_data():
-    assert validate_post_data({'title': 'title', 'content': 'content'}) == True
-    assert validate_post_data({'titles': 'title', 'content': 'content'}) == False
-    assert validate_post_data({'title': 'title', 'contents': 'content'}) == False
-    assert validate_post_data({'title': '', 'content': 'content'}) == False
-    assert validate_post_data({'title': 'title', 'contents': ''}) == False
+    assert validate_post_data({'title': 'title', 'content': 'content'})
+    assert not validate_post_data({'titles': 'title', 'content': 'content'})
+    assert not validate_post_data({'title': 'title', 'contents': 'content'})
+    assert not validate_post_data({'title': '', 'content': 'content'})
+    assert not validate_post_data({'title': 'title', 'contents': ''})
 
 
 def test_generate_unique_id():
