@@ -7,6 +7,9 @@ CORS(app)  # This will enable CORS for all routes
 POSTS = [
     {"id": 1, "title": "First post", "content": "This is the first post."},
     {"id": 2, "title": "Second post", "content": "This is the second post."},
+    {"id": 3, "title": "Third post", "content": "This is the third post."},
+    {"id": 4, "title": "Fourth post", "content": "Another post."},
+    {"id": 5, "title": "Fifth post", "content": "This is the post number five."},
 ]
 
 
@@ -18,6 +21,14 @@ def fetch_post_by_id(post_id, data=POSTS):
     for post in data:
         if post['id'] == post_id:
             return post
+
+
+def search_posts_by_field(query, field, data=POSTS):
+    return [post for post in data if query.lower() in post[field].lower()] if query else []
+
+
+def get_ids_from_posts(posts):
+    return {post['id'] for post in posts}
 
 
 def validate_post_data(data):
@@ -65,6 +76,19 @@ def update_post(post_id):
             return jsonify(post), 200
     return jsonify({'error': 'Bad request. Input JSON should contain one of the following fields: '
                              f'{", ".join(fields)}'}), 400
+
+
+@app.route('/api/posts/search', methods=['GET'])
+def search_posts():
+    title = request.args.get('title')
+    content = request.args.get('content')
+    title_ids = get_ids_from_posts(search_posts_by_field(title, 'title'))
+    content_ids = get_ids_from_posts(search_posts_by_field(content, 'content'))
+    if not title_ids:
+        title_ids = content_ids
+    elif not content_ids:
+        content_ids = title_ids
+    return [fetch_post_by_id(post_id) for post_id in title_ids.intersection(content_ids)]
 
 
 if __name__ == '__main__':
