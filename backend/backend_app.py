@@ -39,7 +39,15 @@ def validate_post_data(data):
 
 @app.route('/api/posts', methods=['GET'])
 def get_posts():
-    return jsonify(POSTS)
+    sort_key = request.args.get('sort')
+    sort_direction = request.args.get('direction')
+    if not sort_key and not sort_direction:
+        return jsonify(POSTS)
+    if not sort_key:
+        sort_key = 'id'
+    posts_sorted = POSTS[:]
+    descending_order = sort_direction == 'desc'
+    return jsonify(sorted(posts_sorted, key=lambda item:item[sort_key], reverse=descending_order))
 
 
 @app.route('/api/posts', methods=['POST'])
