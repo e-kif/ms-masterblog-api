@@ -113,9 +113,9 @@ def search_posts():
     content = request.args.get('content')
     title_ids = get_ids_from_posts(search_posts_by_field(title, 'title'))
     content_ids = get_ids_from_posts(search_posts_by_field(content, 'content'))
-    if not title_ids:
+    if not title:
         title_ids = content_ids
-    elif not content_ids:
+    elif not content:
         content_ids = title_ids
     return [fetch_post_by_id(post_id) for post_id in title_ids.intersection(content_ids)]
 

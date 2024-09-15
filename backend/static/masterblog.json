@@ -36,7 +36,7 @@
   },
 
     "paths": {
-        "/api/posts": {
+      "/api/posts": {
           "get": {
         "summary": "Returns all posts",
         "produces": ["application/json"],
@@ -105,13 +105,13 @@
         },
         "delete": {
           "tags": ["Post"],
-            "parameters": [{
-              "in": "path",
-              "name": "post_id",
-              "required": "true",
-              "type": "integer",
-              "minimum": "1",
-              "description": "ID of the post that is being updated"
+          "parameters": [{
+            "in": "path",
+            "name": "post_id",
+            "required": "true",
+            "type": "integer",
+            "minimum": "1",
+            "description": "ID of the post that is being updated"
             }],
           "responses": {
             "200": {
@@ -122,7 +122,33 @@
             }
           }
         }
-
+      },
+      "/api/posts/search?title={title}&content={content}": {
+        "get": {
+          "tags": ["Post"],
+          "description": "Returns search results. One of the parameters is required",
+          "produces": "application/json",
+          "parameters": [
+            {
+              "in": "path",
+              "name": "title",
+              "type": "string"
+            },
+            {
+              "in": "path",
+              "name": "content",
+              "type": "string"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful operation"
+            },
+            "400": {
+              "description": "Bad request"
+            }
+          }
+        }
       }
     }
 }
