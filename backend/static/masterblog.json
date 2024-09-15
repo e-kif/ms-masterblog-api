@@ -7,9 +7,37 @@
   "servers": [{ "url": "http://localhost:5001" }],
   "tags": [{ "name": "Post", "description": "Post API - CRUD" }],
 
+  "definitions": {
+    "add_post": {
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "Title of the post to be added"
+        },
+        "content": {
+          "type": "string",
+          "description": "Content of the post to be added"
+        }
+      },
+      "required": ["title", "content"]
+    },
+    "update_post": {
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "New title of the post"
+        },
+        "content": {
+          "type": "string",
+          "description": "New content of the post"
+        }
+      }
+    }
+  },
+
     "paths": {
         "/api/posts": {
-            "get": {
+          "get": {
         "summary": "Returns all posts",
         "produces": ["application/json"],
         "tags": ["Post"],
@@ -19,6 +47,82 @@
           }
         }
       },
+          "post": {
+            "summary": "Adds a post",
+            "parameters": [{
+              "in": "body",
+              "name": "add post",
+              "schema": {"$ref":  "#/definitions/add_post"},
+              "description": "Title and content of the new post"
+            }
+            ],
+            "consumes": ["application/json"],
+            "produces": ["application/json"],
+            "tags": ["Post"],
+            "responses": {
+              "201": {
+                "description": "Successful operation"
+              },
+              "400": {
+                "description": "Bad request"
+              }
+            }
+          }
+        },
+      "/api/posts/{post_id}": {
+        "put": {
+          "tags": ["Post"],
+          "consumes": ["application/json"],
+          "produces": ["application/json"],
+          "parameters": [{
+            "in": "path",
+            "name": "post_id",
+            "required": "true",
+            "type": "integer",
+            "minimum": "1",
+            "description": "ID of the post that is being updated"
+            },
+            {"in": "body",
+              "name": "Update post request body",
+            "required":  "true",
+            "type": "application/json",
+            "description": "Information that should be updated. At least one of the fields is required.",
+            "schema": {
+              "$ref": "#/definitions/update_post"
+            }}
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful operation"
+            },
+            "400": {
+              "description": "Bad request"
+            },
+            "404": {
+              "description": "Post not found"
+            }
+          }
+        },
+        "delete": {
+          "tags": ["Post"],
+            "parameters": [{
+              "in": "path",
+              "name": "post_id",
+              "required": "true",
+              "type": "integer",
+              "minimum": "1",
+              "description": "ID of the post that is being updated"
+            }],
+          "responses": {
+            "200": {
+              "description": "Successful operation"
+            },
+            "404": {
+              "description": "Post not found"
+            }
+          }
         }
+
+      }
     }
 }
