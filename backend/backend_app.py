@@ -18,12 +18,13 @@ app = Flask(__name__)
 CORS(app)  # This will enable CORS for all routes
 app.register_blueprint(swagger_ui_blueprint, url_prefix=SWAGGER_URL)
 
+POST_FIELDS = ['title', 'content', 'author']
 POSTS = [
-    {"id": 1, "title": "First post", "content": "This is the first post."},
-    {"id": 2, "title": "Second post", "content": "This is the second post."},
-    {"id": 3, "title": "Third post", "content": "This is the third post."},
-    {"id": 4, "title": "Fourth post", "content": "Another post."},
-    {"id": 5, "title": "Fifth post", "content": "This is the post number five."},
+    {"id": 1, "title": "First post", "content": "This is the first post.", "author": "Joe"},
+    {"id": 2, "title": "Second post", "content": "This is the second post.", "author": "Donald"},
+    {"id": 3, "title": "Third post", "content": "This is the third post.", "author": "Barak"},
+    {"id": 4, "title": "Fourth post", "content": "Another post.", "author": "Bill"},
+    {"id": 5, "title": "Fifth post", "content": "This is the post number five.", "author": "Nadav"},
 ]
 
 
@@ -46,19 +47,22 @@ def get_ids_from_posts(posts):
 
 
 def validate_post_data(data):
-    fields = ['title', 'content']
-    errors = [f'{field} is missing' for field in fields if field not in data or not bool(data[field].strip())]
+    errors = [f'{field} is missing' for field in POST_FIELDS if field not in data or not bool(data[field].strip())]
     return (False, ", ".join(errors)) if bool(errors) else (True, data)
 
 
 @app.route('/api/posts', methods=['GET'])
 def get_posts():
+    params = ['sort', 'direction']
+    for key in request.args:
+        if key not in params:
+            return jsonify({'error': f'Bar request: unexpected key {key}'})
     sort_key = request.args.get('sort')
     sort_direction = request.args.get('direction')
     if not sort_key and not sort_direction:
         return jsonify(POSTS)
     errors = []
-    if sort_key not in (None, 'title', 'content'):
+    if sort_key not in [None] + POST_FIELDS:
         errors.append(f'not supported sort argument {sort_key}')
     if sort_direction not in (None, 'asc', 'desc'):
         errors.append(f'not supported direction argument {sort_direction}')
@@ -68,7 +72,7 @@ def get_posts():
         sort_key = 'id'
     posts_sorted = POSTS[:]
     descending_order = sort_direction == 'desc'
-    return jsonify(sorted(posts_sorted, key=lambda item:item[sort_key], reverse=descending_order))
+    return jsonify(sorted(posts_sorted, key=lambda item: item[sort_key], reverse=descending_order))
 
 
 @app.route('/api/posts', methods=['POST'])
@@ -98,26 +102,32 @@ def update_post(post_id):
     fields = ['title', 'content']
     put_data = request.get_json()
     for key in put_data.keys():
-        if key in fields:
-            for field in fields:
-                if put_data.get(field):
-                    post[field] = request.get_json()[field]
-            return jsonify(post), 200
+        if key not in POST_FIELDS:
+            return jsonify({'error': f'Bad request: unknown property {key}'})
+        if put_data.get(key):
+            post[key] = request.get_json()[key]
+        return jsonify(post), 200
     return jsonify({'error': 'Bad request. Input JSON should contain one of the following fields: '
                              f'{", ".join(fields)}'}), 400
 
 
 @app.route('/api/posts/search', methods=['GET'])
 def search_posts():
-    title = request.args.get('title')
-    content = request.args.get('content')
-    title_ids = get_ids_from_posts(search_posts_by_field(title, 'title'))
-    content_ids = get_ids_from_posts(search_posts_by_field(content, 'content'))
-    if not title:
-        title_ids = content_ids
-    elif not content:
-        content_ids = title_ids
-    return [fetch_post_by_id(post_id) for post_id in title_ids.intersection(content_ids)]
+    posts_ids = set()
+    queries = []
+    for key in request.args:
+        if key not in POST_FIELDS:
+            return jsonify({'error': f'Bad request: unexpected key {key}'}), 400
+    for field in POST_FIELDS:
+        query = request.args.get(field)
+        if query:
+            posts = search_posts_by_field(query, field)
+            queries.append(query)
+            if posts and len(queries) == 1 and not posts_ids:
+                posts_ids = get_ids_from_posts(posts)
+            elif posts_ids:
+                posts_ids = posts_ids.intersection(get_ids_from_posts(posts))
+    return [fetch_post_by_id(post_id) for post_id in set(posts_ids)]
 
 
 if __name__ == '__main__':

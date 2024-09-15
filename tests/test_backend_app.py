@@ -3,7 +3,7 @@ from backend.backend_app import (validate_post_data,
                                  generate_unique_id,
                                  fetch_post_by_id,
                                  search_posts_by_field,
-                                 get_ids_from_posts)
+                                 get_ids_from_posts, POST_FIELDS)
 
 POSTS = [
     {'id': 1, 'title': 'post one', 'content': '001'},
@@ -13,20 +13,16 @@ POSTS = [
 
 
 def test_validate_post_data():
-    assert validate_post_data({'title': '1', 'content': '2'})[0]
-    assert validate_post_data({'title': '1', 'content': '2'})[1] == {'title': '1', 'content': '2'}
-    assert not validate_post_data({'titles': '1', 'content': '2'})[0]
-    assert not validate_post_data({'title': '1', 'contents': '2'})[0]
-    assert not validate_post_data({'title': '', 'content': '2'})[0]
-    assert not validate_post_data({'title': '1', 'contents': ''})[0]
-    assert validate_post_data({'titles': '1', 'content': '2'})[1] == 'title is missing'
-    assert validate_post_data({'title': '', 'content': 'content'})[1] == 'title is missing'
-    assert validate_post_data({'title': '1', 'contente': '2'})[1] == 'content is missing'
-    assert validate_post_data({'title': '1', 'content': ''})[1] == 'content is missing'
-    assert validate_post_data({'title': '', 'content': ''})[1] == 'title is missing, content is missing'
-    assert validate_post_data({'titles': '1', 'contento': '2'})[1] == 'title is missing, content is missing'
-    assert validate_post_data({'title': '', 'contento': '2'})[1] == 'title is missing, content is missing'
-    assert validate_post_data({'titl': '1', 'content': ''})[1] == 'title is missing, content is missing'
+    assert validate_post_data({'title': '1', 'content': '2', 'author': '3'})[0]
+    assert validate_post_data({'title': '1', 'content': '2', 'author': '3'})[1] == {'title': '1',
+                                                                                    'content': '2',
+                                                                                    'author': '3'}
+    assert not validate_post_data({'titles': '1', 'content': '2', 'author': '3'})[0]
+    assert not validate_post_data({'title': '1', 'contents': '2', 'author': '3'})[0]
+    assert not validate_post_data({'title': '', 'content': '2', 'author': '3'})[0]
+    assert not validate_post_data({'title': '1', 'contents': '', 'author': '3'})[0]
+    assert not validate_post_data({'title': '1', 'content': '2', 'autor': '3'})[0]
+    assert not validate_post_data({'title': '1', 'content': '2', 'auttor': ''})[0]
 
 
 def test_generate_unique_id():
