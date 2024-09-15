@@ -43,6 +43,13 @@ def get_posts():
     sort_direction = request.args.get('direction')
     if not sort_key and not sort_direction:
         return jsonify(POSTS)
+    errors = []
+    if sort_key not in (None, 'title', 'content'):
+        errors.append(f'not supported sort argument {sort_key}')
+    if sort_direction not in (None, 'asc', 'desc'):
+        errors.append(f'not supported direction argument {sort_direction}')
+    if errors:
+        return jsonify({'error': f'Bad request: {", ".join(errors)}'}), 400
     if not sort_key:
         sort_key = 'id'
     posts_sorted = POSTS[:]
