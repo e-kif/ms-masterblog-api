@@ -3,7 +3,9 @@ from backend.backend_app import (validate_post_data,
                                  generate_unique_id,
                                  fetch_post_by_id,
                                  search_posts_by_field,
-                                 get_ids_from_posts, POST_FIELDS)
+                                 get_ids_from_posts,
+                                 validate_date,
+                                 POST_FIELDS)
 
 POSTS = [
     {'id': 1, 'title': 'post one', 'content': '001'},
@@ -76,3 +78,14 @@ def test_get_ids_from_posts():
     assert get_ids_from_posts([{'id': 1}, {'id': 2}]) == {1, 2}
     assert get_ids_from_posts([]) == set()
     assert get_ids_from_posts([{'id': 5}]) == {5}
+
+
+def test_validate_date():
+    assert not validate_date('2025-12-02')
+    assert validate_date('2024-09-05')
+    assert not validate_date('2024.01.02')
+    assert not validate_date('31-12-2012')
+    assert not validate_date('2024-02-30')
+    assert not validate_date('2023-14-04')
+    assert not validate_date('2023-1-04')
+    assert not validate_date('2023-01-00')

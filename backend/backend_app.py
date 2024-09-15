@@ -1,6 +1,8 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from flask_swagger_ui import get_swaggerui_blueprint
+import datetime
+import re
 
 SWAGGER_URL = "/api/docs"
 API_URL = "/static/masterblog.json"
@@ -19,12 +21,14 @@ CORS(app)  # This will enable CORS for all routes
 app.register_blueprint(swagger_ui_blueprint, url_prefix=SWAGGER_URL)
 
 POST_FIELDS = ['title', 'content', 'author']
+PUT_FIELDS = POST_FIELDS + ['date']
+
 POSTS = [
-    {"id": 1, "title": "First post", "content": "This is the first post.", "author": "Joe"},
-    {"id": 2, "title": "Second post", "content": "This is the second post.", "author": "Donald"},
-    {"id": 3, "title": "Third post", "content": "This is the third post.", "author": "Barak"},
-    {"id": 4, "title": "Fourth post", "content": "Another post.", "author": "Bill"},
-    {"id": 5, "title": "Fifth post", "content": "This is the post number five.", "author": "Nadav"},
+    {"id": 1, "title": "First post", "content": "This is the first post.", "author": "Joe", "date": "2024-04-03"},
+    {"id": 2, "title": "Second post", "content": "This is the second post.", "author": "Donald", "date": "2019-05-14"},
+    {"id": 3, "title": "Third post", "content": "This is the third post.", "author": "Barak", "date": "2015-01-13"},
+    {"id": 4, "title": "Fourth post", "content": "Another post.", "author": "Bill", "date": "2008-11-21"},
+    {"id": 5, "title": "Fifth post", "content": "This is the post number five.", "author": "Nadav", "date": "2024-03-13"},
 ]
 
 
@@ -51,6 +55,24 @@ def validate_post_data(data):
     return (False, ", ".join(errors)) if bool(errors) else (True, data)
 
 
+def generate_current_date():
+    return datetime.datetime.now().strftime('%Y-%m-%d')
+
+
+def validate_date(string):
+    date_pattern = re.compile("\d{4}-\d{2}-\d{2}")
+    if not date_pattern.match(string):
+        return False
+    date_parts = string.split('-')
+    try:
+        date = datetime.date(int(date_parts[0]), int(date_parts[1]), int(date_parts[2]))
+        if date > datetime.date.today():
+            raise ValueError
+    except ValueError:
+        return False
+    return True
+
+
 @app.route('/api/posts', methods=['GET'])
 def get_posts():
     params = ['sort', 'direction']
@@ -62,7 +84,7 @@ def get_posts():
     if not sort_key and not sort_direction:
         return jsonify(POSTS)
     errors = []
-    if sort_key not in [None] + POST_FIELDS:
+    if sort_key not in [None] + PUT_FIELDS:
         errors.append(f'not supported sort argument {sort_key}')
     if sort_direction not in (None, 'asc', 'desc'):
         errors.append(f'not supported direction argument {sort_direction}')
@@ -81,6 +103,7 @@ def add_post():
     if not is_valid:
         return jsonify({'error': f'Bad request: {data}.'}), 400
     data['id'] = generate_unique_id()
+    data['date'] = generate_current_date()
     POSTS.append(data)
     return jsonify(data), 201
 
@@ -99,16 +122,15 @@ def update_post(post_id):
     post = fetch_post_by_id(post_id)
     if not post:
         return jsonify({'error': f'post with id {post_id} not found.'}), 404
-    fields = ['title', 'content']
     put_data = request.get_json()
     for key in put_data.keys():
-        if key not in POST_FIELDS:
+        if key not in PUT_FIELDS:
             return jsonify({'error': f'Bad request: unknown property {key}'})
         if put_data.get(key):
             post[key] = request.get_json()[key]
         return jsonify(post), 200
     return jsonify({'error': 'Bad request. Input JSON should contain one of the following fields: '
-                             f'{", ".join(fields)}'}), 400
+                             f'{", ".join(PUT_FIELDS)}'}), 400
 
 
 @app.route('/api/posts/search', methods=['GET'])
@@ -116,9 +138,9 @@ def search_posts():
     posts_ids = set()
     queries = []
     for key in request.args:
-        if key not in POST_FIELDS:
+        if key not in PUT_FIELDS:
             return jsonify({'error': f'Bad request: unexpected key {key}'}), 400
-    for field in POST_FIELDS:
+    for field in PUT_FIELDS:
         query = request.args.get(field)
         if query:
             posts = search_posts_by_field(query, field)
