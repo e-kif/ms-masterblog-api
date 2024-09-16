@@ -6,7 +6,6 @@
   },
   "servers": [{ "url": "http://localhost:5001" }],
   "tags": [{ "name": "Post", "description": "Post API - CRUD" }],
-
   "definitions": {
     "add_post": {
       "properties": {
@@ -17,9 +16,13 @@
         "content": {
           "type": "string",
           "description": "Content of the post to be added"
+        },
+        "author": {
+          "type": "string",
+          "description": "Author of the new post"
         }
       },
-      "required": ["title", "content"]
+      "required": ["title", "content", "author"]
     },
     "update_post": {
       "properties": {
@@ -30,48 +33,81 @@
         "content": {
           "type": "string",
           "description": "New content of the post"
+        },
+        "author": {
+          "type": "string",
+          "description": "New author of the post"
+        },
+        "date": {
+          "type": "string",
+          "description": "New date of the post. Accepts date in format YYYY-MM-DD (2024-09-16). Supports dates up to today (including)."
         }
       }
     }
   },
 
     "paths": {
-      "/api/posts": {
-          "get": {
-        "summary": "Returns all posts",
-        "produces": ["application/json"],
-        "tags": ["Post"],
-        "responses": {
-          "200": {
-            "description": "Successful operation"
+      "/api/posts?sort={sort-key}&direction={}": {
+        "get": {
+          "summary": "Returns all posts",
+          "description": "Sort key and direction both are optional",
+          "produces": [
+            "application/json"
+          ],
+          "tags": [
+            "Post"
+          ],
+          "parameters": [
+            {
+              "in": "path",
+              "name": "sort-key",
+              "type": "string",
+              "description": "A key for sorting. Supported values: title, content, author, date"
+            },
+            {
+              "in": "path",
+              "name": "direction",
+              "type": "string",
+              "description": "Sorting order. Supported values: acs (default) and desc"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful operation"
+            },
+            "400": {
+              "description": "Bad request. If unsupported query key or value is used."
+            }
           }
         }
       },
-          "post": {
-            "summary": "Adds a post",
-            "parameters": [{
-              "in": "body",
-              "name": "add post",
-              "schema": {"$ref":  "#/definitions/add_post"},
-              "description": "Title and content of the new post"
-            }
-            ],
-            "consumes": ["application/json"],
-            "produces": ["application/json"],
-            "tags": ["Post"],
-            "responses": {
-              "201": {
-                "description": "Successful operation"
-              },
-              "400": {
-                "description": "Bad request"
-              }
+      "api/posts": {
+        "post": {
+          "summary": "Adds a post",
+          "parameters": [{
+            "in": "body",
+            "name": "add post",
+            "schema": {"$ref":  "#/definitions/add_post"},
+            "description": "Title, content and the author of the new post."
+          }
+          ],
+          "consumes": ["application/json"],
+          "produces": ["application/json"],
+          "tags": ["Post"],
+          "responses": {
+            "201": {
+              "description": "Successful operation"
+            },
+            "400": {
+              "description": "Bad request. If one or more requested keys (title, content, author) are not provided or their value is empty."
             }
           }
-        },
+        }
+      },
       "/api/posts/{post_id}": {
         "put": {
           "tags": ["Post"],
+          "summary": "Updates post info",
           "consumes": ["application/json"],
           "produces": ["application/json"],
           "parameters": [{
@@ -82,21 +118,22 @@
             "minimum": "1",
             "description": "ID of the post that is being updated"
             },
-            {"in": "body",
+            {
+              "in": "body",
               "name": "Update post request body",
-            "required":  "true",
-            "type": "application/json",
-            "description": "Information that should be updated. At least one of the fields is required.",
-            "schema": {
-              "$ref": "#/definitions/update_post"
-            }}
+              "required":  "true",
+              "type": "application/json",
+              "description": "Information that should be updated. At least one of the fields is required.",
+              "schema": {
+                "$ref": "#/definitions/update_post"
+              }}
           ],
           "responses": {
             "200": {
               "description": "Successful operation"
             },
             "400": {
-              "description": "Bad request"
+              "description": "Bad request. If given unsupported key or its value is empty."
             },
             "404": {
               "description": "Post not found"
@@ -105,6 +142,7 @@
         },
         "delete": {
           "tags": ["Post"],
+          "summary": "Deletes a post",
           "parameters": [{
             "in": "path",
             "name": "post_id",
@@ -118,15 +156,16 @@
               "description": "Successful operation"
             },
             "404": {
-              "description": "Post not found"
+              "description": "Post with given id was not found"
             }
           }
         }
       },
-      "/api/posts/search?title={title}&content={content}": {
+      "/api/posts/search?title={title}&content={content}&author={author}&date={date}": {
         "get": {
           "tags": ["Post"],
-          "description": "Returns search results. One of the parameters is required",
+          "summary": "returns posts matching search criteria",
+          "description": "Returns search results. One of the parameters is required. If two or more keys are provided, returns posts, that qualified to all search criteria",
           "produces": "application/json",
           "parameters": [
             {
@@ -138,6 +177,17 @@
               "in": "path",
               "name": "content",
               "type": "string"
+            },
+            {
+              "in": "path",
+              "name": "author",
+              "type": "string"
+            },
+            {
+              "in": "path",
+              "name": "date",
+              "type": "string",
+              "description": "Dates are stored in format YYYY-MM-DD (2024-09-16). You can provide only a part of date as a value."
             }
           ],
           "responses": {
@@ -145,7 +195,7 @@
               "description": "Successful operation"
             },
             "400": {
-              "description": "Bad request"
+              "description": "Bad request. If unsupported key is provided."
             }
           }
         }
