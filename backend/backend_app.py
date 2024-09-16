@@ -73,6 +73,11 @@ def validate_date(string):
     return True
 
 
+def convert_date_string_into_datetime(date_string):
+    year, month, day = date_string.split('-')
+    return datetime.date(int(year), int(month), int(day))
+
+
 @app.route('/api/posts', methods=['GET'])
 def get_posts():
     params = ['sort', 'direction']
@@ -94,7 +99,11 @@ def get_posts():
         sort_key = 'id'
     posts_sorted = POSTS[:]
     descending_order = sort_direction == 'desc'
-    return jsonify(sorted(posts_sorted, key=lambda item: item[sort_key], reverse=descending_order))
+    return (jsonify(sorted(posts_sorted,
+                           key=lambda item: convert_date_string_into_datetime(item[sort_key]),
+                           reverse=descending_order))
+                    if sort_key == 'date'
+            else jsonify(sorted(posts_sorted, key=lambda item: item[sort_key], reverse=descending_order)))
 
 
 @app.route('/api/posts', methods=['POST'])

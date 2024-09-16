@@ -1,10 +1,11 @@
-import pytest
+import datetime
 from backend.backend_app import (validate_post_data,
                                  generate_unique_id,
                                  fetch_post_by_id,
                                  search_posts_by_field,
                                  get_ids_from_posts,
                                  validate_date,
+                                 convert_date_string_into_datetime,
                                  POST_FIELDS)
 
 POSTS = [
@@ -89,3 +90,7 @@ def test_validate_date():
     assert not validate_date('2023-14-04')
     assert not validate_date('2023-1-04')
     assert not validate_date('2023-01-00')
+
+
+def test_convert_date_string_into_datetime():
+    assert convert_date_string_into_datetime('2024-03-05') == datetime.date(2024, 3, 5)
