@@ -2,6 +2,7 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 from flask_swagger_ui import get_swaggerui_blueprint
 import datetime
+import json
 import re
 
 SWAGGER_URL = "/api/docs"
@@ -23,13 +24,15 @@ app.register_blueprint(swagger_ui_blueprint, url_prefix=SWAGGER_URL)
 POST_FIELDS = ['title', 'content', 'author']
 PUT_FIELDS = POST_FIELDS + ['date']
 
-POSTS = [
-    {"id": 1, "title": "First post", "content": "This is the first post.", "author": "Joe", "date": "2024-04-03"},
-    {"id": 2, "title": "Second post", "content": "This is the second post.", "author": "Donald", "date": "2019-05-14"},
-    {"id": 3, "title": "Third post", "content": "This is the third post.", "author": "Barak", "date": "2015-01-13"},
-    {"id": 4, "title": "Fourth post", "content": "Another post.", "author": "Bill", "date": "2008-11-21"},
-    {"id": 5, "title": "Fifth post", "content": "This is the post number five.", "author": "Nadav", "date": "2024-03-13"},
-]
+
+def write_post_data_to_json(posts_dict):
+    with open('posts.json', 'w', encoding='utf8') as handle:
+        handle.write(json.dumps(posts_dict))
+
+
+def read_posts_data_from_json(filename):
+    with open(filename, 'r', encoding='utf8') as handle:
+        return json.loads(handle.read())
 
 
 def generate_unique_id(data=POSTS):
@@ -162,4 +165,5 @@ def search_posts():
 
 
 if __name__ == '__main__':
-    app.run(host="0.0.0.0", port=5002, debug=True)
+    write_post_data_to_json(POSTS)
+    # app.run(host="0.0.0.0", port=5002, debug=True)
