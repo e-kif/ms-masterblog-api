@@ -89,3 +89,8 @@ body {
 .post button:hover {
     background-color: #cc0000;
 }
+
+.post p.post-meta {
+    color: #888;
+    font-size: 0.8em;
+}
