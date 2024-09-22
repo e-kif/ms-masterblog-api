@@ -2,8 +2,8 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 from flask_swagger_ui import get_swaggerui_blueprint
 import datetime
-import json
 import re
+from storage import Storage
 
 SWAGGER_URL = "/api/docs"
 API_URL = "/static/masterblog.json"
@@ -16,40 +16,30 @@ swagger_ui_blueprint = get_swaggerui_blueprint(
     }
 )
 
-
 app = Flask(__name__)
 CORS(app)  # This will enable CORS for all routes
 app.register_blueprint(swagger_ui_blueprint, url_prefix=SWAGGER_URL)
 
 POST_FIELDS = ['title', 'content', 'author']
 PUT_FIELDS = POST_FIELDS + ['date']
+database = Storage('posts.json')
 
 
-def write_post_data_to_json(posts_dict):
-    with open('posts.json', 'w', encoding='utf8') as handle:
-        handle.write(json.dumps(posts_dict))
-
-
-def read_posts_data_from_json(filename):
-    with open(filename, 'r', encoding='utf8') as handle:
-        return json.loads(handle.read())
-
-
-def generate_unique_id(data=POSTS):
+def generate_unique_id(data=database.posts):
     return max(post['id'] for post in data) + 1 if data else 1
 
 
-def fetch_post_by_id(post_id, data=POSTS):
+def fetch_post_by_id(post_id, data=database.posts):
     for post in data:
         if post['id'] == post_id:
             return post
 
 
-def search_posts_by_field(query, field, data=POSTS):
+def search_posts_by_field(query, field, data=database.posts):
     return [post for post in data if query.lower() in post[field].lower()] if query else []
 
 
-def get_ids_from_posts(posts):
+def get_ids_from_posts(posts=database.posts):
     return {post['id'] for post in posts}
 
 
@@ -90,7 +80,7 @@ def get_posts():
     sort_key = request.args.get('sort')
     sort_direction = request.args.get('direction')
     if not sort_key and not sort_direction:
-        return jsonify(POSTS)
+        return jsonify(database.posts)
     errors = []
     if sort_key not in [None] + PUT_FIELDS:
         errors.append(f'not supported sort argument {sort_key}')
@@ -100,12 +90,12 @@ def get_posts():
         return jsonify({'error': f'Bad request: {", ".join(errors)}'}), 400
     if not sort_key:
         sort_key = 'id'
-    posts_sorted = POSTS[:]
+    posts_sorted = database.posts[:]
     descending_order = sort_direction == 'desc'
     return (jsonify(sorted(posts_sorted,
                            key=lambda item: convert_date_string_into_datetime(item[sort_key]),
                            reverse=descending_order))
-                    if sort_key == 'date'
+            if sort_key == 'date'
             else jsonify(sorted(posts_sorted, key=lambda item: item[sort_key], reverse=descending_order)))
 
 
@@ -116,7 +106,7 @@ def add_post():
         return jsonify({'error': f'Bad request: {data}.'}), 400
     data['id'] = generate_unique_id()
     data['date'] = generate_current_date()
-    POSTS.append(data)
+    database.posts.append(data)
     return jsonify(data), 201
 
 
@@ -125,7 +115,7 @@ def delete_post(post_id):
     post = fetch_post_by_id(post_id)
     if not post:
         return jsonify({'error': f'There is no post with id {post_id}.'}), 404
-    POSTS.remove(post)
+    database.posts.remove(post)
     return jsonify({'message': f'Post with id {post_id} has been deleted successfully.'}), 200
 
 
@@ -135,14 +125,16 @@ def update_post(post_id):
     if not post:
         return jsonify({'error': f'post with id {post_id} not found.'}), 404
     put_data = request.get_json()
+    if not set(put_data.keys()).intersection(set(PUT_FIELDS)):
+        return jsonify({'error': 'Bad request. Input JSON should contain one of the following fields: '
+                                 f'{", ".join(PUT_FIELDS)}'}), 400
     for key in put_data.keys():
         if key not in PUT_FIELDS:
             return jsonify({'error': f'Bad request: unknown property {key}'})
         if put_data.get(key):
             post[key] = request.get_json()[key]
-        return jsonify(post), 200
-    return jsonify({'error': 'Bad request. Input JSON should contain one of the following fields: '
-                             f'{", ".join(PUT_FIELDS)}'}), 400
+    database.update_storage_file(database.posts)
+    return jsonify(post), 200
 
 
 @app.route('/api/posts/search', methods=['GET'])
@@ -165,5 +157,4 @@ def search_posts():
 
 
 if __name__ == '__main__':
-    write_post_data_to_json(POSTS)
-    # app.run(host="0.0.0.0", port=5002, debug=True)
+    app.run(host="0.0.0.0", port=5002, debug=True)
