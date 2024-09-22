@@ -156,5 +156,16 @@ def search_posts():
     return [fetch_post_by_id(post_id) for post_id in set(posts_ids)]
 
 
+@app.route('/api/posts/<int:post_id>/like')
+def like_post(post_id):
+    post = fetch_post_by_id(post_id)
+    if 'likes' in post.keys():
+        post['likes'] += 1
+    else:
+        post['likes'] = 1
+    database.update_storage_file(database.posts)
+    return jsonify(post), 200
+
+
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=5002, debug=True)

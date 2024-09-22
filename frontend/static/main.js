@@ -26,12 +26,20 @@ function loadPosts() {
             // For each post in the response, create a new post element and add it to the page
             data.forEach(post => {
                 const postDiv = document.createElement('div');
+                if (post.likes == undefined) {post.likes = 0};
                 postDiv.className = 'post';
-                postDiv.innerHTML = `<h2 title="Post id ${post.id}">${post.title}</h2>
-                <p class="post-meta"><em>Author: ${post.author}</em><br>
-                <em>Publish date: ${post.date}</em></p>
-                <p>${post.content}</p>
-                <button onclick="deletePost(${post.id})">Delete</button>`;
+                postDiv.innerHTML = `
+                <div class="post-info">
+                    <h2 title="Post id ${post.id}">${post.title}</h2>
+                    <p class="post-meta"><em>Author: ${post.author}</em><br>
+                    <em>Publish date: ${post.date}</em></p>
+                    <p>${post.content}</p>
+                </div>
+                <div class="post-buttons">
+                    <button onclick="deletePost(${post.id})">Delete</button>
+                    <p class="likes">${post.likes} <span class="emoji" onclick="likePost(${post.id})">👍</span></p>
+                </div>
+                `;
                 postContainer.appendChild(postDiv);
             });
         })
@@ -73,4 +81,16 @@ function deletePost(postId) {
         loadPosts(); // Reload the posts after deleting one
     })
     .catch(error => console.error('Error:', error));  // If an error occurs, log it to the console
+}
+
+
+// Function to send a GET request to the specific post's like endpoint
+function likePost(postId) {
+    var baseUrl = document.getElementById('api-base-url').value
+    fetch(baseUrl + '/posts/' + postId + '/like', {method: 'GET'})
+    .then(response => {
+        console.log('Post got one like:', postId);
+        loadPosts();
+    })
+    .catch(error => console.error('Error:', error));
 }
