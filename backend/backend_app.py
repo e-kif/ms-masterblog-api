@@ -22,6 +22,7 @@ app.register_blueprint(swagger_ui_blueprint, url_prefix=SWAGGER_URL)
 
 POST_FIELDS = ['title', 'content', 'author']
 PUT_FIELDS = POST_FIELDS + ['date']
+SORT_FIELDS = PUT_FIELDS + ['id', 'likes']
 database = Storage('posts.json')
 
 
@@ -82,7 +83,7 @@ def get_posts():
     if not sort_key and not sort_direction:
         return jsonify(database.posts)
     errors = []
-    if sort_key not in [None] + PUT_FIELDS:
+    if sort_key not in [None] + SORT_FIELDS:
         errors.append(f'not supported sort argument {sort_key}')
     if sort_direction not in (None, 'asc', 'desc'):
         errors.append(f'not supported direction argument {sort_direction}')
@@ -96,7 +97,7 @@ def get_posts():
                            key=lambda item: convert_date_string_into_datetime(item[sort_key]),
                            reverse=descending_order))
             if sort_key == 'date'
-            else jsonify(sorted(posts_sorted, key=lambda item: item[sort_key], reverse=descending_order)))
+            else jsonify(sorted(posts_sorted, key=lambda item: item.get(sort_key, 0).lower() if isinstance(item.get(sort_key, 0), str) else item.get(sort_key, 0), reverse=descending_order)))
 
 
 @app.route('/api/posts', methods=['POST'])
@@ -107,6 +108,7 @@ def add_post():
     data['id'] = generate_unique_id()
     data['date'] = generate_current_date()
     database.posts.append(data)
+    database.update_storage_file(database.posts)
     return jsonify(data), 201
 
 

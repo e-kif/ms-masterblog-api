@@ -33,8 +33,9 @@ body {
     column-gap: 12px;
 }
 
-.input-field input,
-.input-field button {
+.input-field .inputs>input,
+.input-field button,
+.title-author>input {
     height: 40px;
     padding: 10px;
     font-size: 16px;
@@ -118,7 +119,54 @@ body {
     font-size: 0.8em;
 }
 
-@media screen and (max-width: 800px) {
+
+.inputs .load-controls {
+    display: grid;
+    grid-template-columns: 32px 1fr 32px 1fr;
+    align-items: center;
+
+}
+
+.sort-params {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    padding: 12px 0;
+    display: none;
+}
+
+.search-params {
+    display: grid;
+    grid-template-columns: 1fr;
+    row-gap: 8px;
+    width: 100%;
+    display: none;
+}
+
+.search-param {
+    display:grid;
+    grid-template-columns: 40px 112px 1fr;
+    align-items: center;
+}
+
+.search-params label {
+    display: inline-block;
+}
+
+.search-param input[type=checkbox] {
+    max-height: 16px;
+}
+
+.search-params input[type=text] {
+    padding: 8px;
+    width: 100%;
+    max-width:600px;
+    border-radius:4px;
+    border: none;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+
+@media screen and (max-width: 900px) {
 .input-field {
     margin-bottom: 32px;
     grid-template-columns: 1fr;
@@ -136,6 +184,10 @@ body {
 
 .input-field .title-author {
     grid-template-columns: 1fr;
+}
+
+.sort-params {
+    grid-template-columns: repeat(2, 1fr);
 }
 
 }

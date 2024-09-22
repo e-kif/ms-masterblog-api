@@ -13,10 +13,18 @@ window.onload = function() {
 function loadPosts() {
     // Retrieve the base URL from the input field and save it to local storage
     var baseUrl = document.getElementById('api-base-url').value;
+    var query = '';
     localStorage.setItem('apiBaseUrl', baseUrl);
 
+    if (document.getElementById('sort').checked) {
+        var sortKey = document.querySelector('.sort-param input[type=radio]:checked').id.slice(0,-5)
+        if (document.querySelector('.sort-param input[type=checkbox]:checked')) {var direction = 'desc'}
+        else {var direction = 'asc'};
+        query = '?sort=' + sortKey + '&direction=' + direction
+    }
+    console.log(query)
     // Use the Fetch API to send a GET request to the /posts endpoint
-    fetch(baseUrl + '/posts')
+    fetch(baseUrl + '/posts' + query)
         .then(response => response.json())  // Parse the JSON data from the response
         .then(data => {  // Once the data is ready, we can use it
             // Clear out the post container first
@@ -93,4 +101,12 @@ function likePost(postId) {
         loadPosts();
     })
     .catch(error => console.error('Error:', error));
+}
+
+function loadParamToggle(elemId) {
+    if (document.getElementById(elemId).checked) {
+        document.getElementsByClassName('search-params')[0].style.display = 'none';
+        document.getElementsByClassName('sort-params')[0].style.display = 'none';
+        document.getElementsByClassName(elemId + '-params')[0].style.display = 'grid';
+    }
 }
