@@ -22,6 +22,22 @@ function loadPosts() {
         else {var direction = 'asc'};
         query = '?sort=' + sortKey + '&direction=' + direction
     }
+
+    if (document.getElementById('search').checked) {
+        query = '/search?'
+        var searchKeys = document.querySelectorAll('.search-param input[type=checkbox]:checked')
+        var ids = searchKeys.forEach(function (item) {return item.id})
+        params = []
+        for (i=0; i<searchKeys.length; i++){
+            current_id = searchKeys[i].id
+            params.push(current_id + "=" + document.getElementById(current_id + '-value').value)
+
+        }
+
+        query += params.join('&')
+        console.log(query)
+    }
+
     console.log(query)
     // Use the Fetch API to send a GET request to the /posts endpoint
     fetch(baseUrl + '/posts' + query)
