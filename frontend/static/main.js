@@ -44,12 +44,13 @@ function addPost() {
     var baseUrl = document.getElementById('api-base-url').value;
     var postTitle = document.getElementById('post-title').value;
     var postContent = document.getElementById('post-content').value;
+    var postAuthor = document.getElementById('post-author').value;
 
     // Use the Fetch API to send a POST request to the /posts endpoint
     fetch(baseUrl + '/posts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title: postTitle, content: postContent })
+        body: JSON.stringify({ title: postTitle, content: postContent, author: postAuthor })
     })
     .then(response => response.json())  // Parse the JSON data from the response
     .then(post => {

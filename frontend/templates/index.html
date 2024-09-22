@@ -15,8 +15,13 @@
             <button onclick="loadPosts()">Load Posts</button>
         </div>
         <div class="input-field">
-            <input type="text" id="post-title" placeholder="Enter Post Title">
-            <input type="text" id="post-content" placeholder="Enter Post Content">
+            <div class="inputs">
+                <div class="title-author">
+                    <input type="text" id="post-title" placeholder="Enter Post Title">
+                    <input type="text" id="post-author" placeholder="Enter Post Author">
+                </div>
+                <input type="text" id="post-content" placeholder="Enter Post Content">
+           </div>
             <button onclick="addPost()">Add Post</button>
         </div>
         <div id="post-container">
