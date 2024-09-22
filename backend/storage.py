@@ -1,5 +1,6 @@
 import json
 import os
+import datetime
 
 
 class Storage:
@@ -7,10 +8,21 @@ class Storage:
     def __init__(self, filename='posts.json'):
         self._storage_filename = filename
         if not os.path.exists(self._storage_filename):
-            with open(self._storage_filename, 'w', encoding='utf8') as handle:
-                handle.write('[]')
-        with open(self._storage_filename, 'r', encoding='utf8') as handle:
-            self._storage = json.loads(handle.read())
+            self.initiate_empty_json()
+        try:
+            with open(self._storage_filename, 'r', encoding='utf8') as handle:
+                self._storage = json.loads(handle.read())
+        except json.decoder.JSONDecodeError:
+            print(f'Storage file {self._storage_filename} has invalid JSON structure or syntax')
+            backup = f'{self._storage_filename}_{datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")}.bak'
+            os.rename(self._storage_filename, backup)
+            print(f'Invalid storage file was renamed to {backup}. Proceeding with empty file {self._storage_filename}')
+            self.initiate_empty_json()
+            self._storage = list()
+
+    def initiate_empty_json(self):
+        with open(self._storage_filename, 'w', encoding='utf8') as handle:
+            handle.write(json.dumps([]))
 
     @property
     def posts(self):
