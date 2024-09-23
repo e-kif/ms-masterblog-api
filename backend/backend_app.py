@@ -3,7 +3,7 @@ from flask_cors import CORS
 from flask_swagger_ui import get_swaggerui_blueprint
 import datetime
 import re
-from backend.storage import Storage
+from storage import Storage
 
 SWAGGER_URL = "/api/docs"
 API_URL = "/static/masterblog.json"
@@ -22,7 +22,7 @@ app.register_blueprint(swagger_ui_blueprint, url_prefix=SWAGGER_URL)
 
 POST_FIELDS = ['title', 'content', 'author']
 PUT_FIELDS = POST_FIELDS + ['date']
-SORT_FIELDS = PUT_FIELDS + ['id', 'likes']
+SORT_FIELDS = PUT_FIELDS + ['id', 'likes', 'comments']
 database = Storage('posts.json')
 
 
@@ -106,15 +106,18 @@ def get_posts():
         sort_key = 'id'
     posts_sorted = database.posts[:]
     descending_order = sort_direction == 'desc'
-    return (jsonify(sorted(posts_sorted,
-                           key=lambda item: convert_date_string_into_datetime(item[sort_key]),
-                           reverse=descending_order))
-            if sort_key == 'date'
-            else jsonify(sorted(posts_sorted,
-                                key=lambda item: item.get(sort_key, 0).lower()
-                                if isinstance(item.get(sort_key, 0), str)
-                                else item.get(sort_key, 0),
-                                reverse=descending_order)))
+    return jsonify(sorted(posts_sorted, key=lambda item: get_sort_item(sort_key, item), reverse=descending_order))
+
+
+def get_sort_item(sort_key, item):
+    if sort_key == 'date':
+        return convert_date_string_into_datetime(item[sort_key])
+    if isinstance(item.get(sort_key), str):
+        return item.get(sort_key, "0").lower()
+    elif isinstance(item.get(sort_key), list):
+        return len(item.get(sort_key, []))
+    else:
+        return item.get(sort_key, 0)
 
 
 @app.route('/api/posts', methods=['POST'])

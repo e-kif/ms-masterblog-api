@@ -83,7 +83,8 @@ body {
     justify-self: end;
 }
 
-.post-buttons .likes {
+.post-buttons .likes,
+.post-buttons .post-comments {
     text-align: right;
 }
 
