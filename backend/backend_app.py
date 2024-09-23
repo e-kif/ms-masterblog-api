@@ -169,5 +169,20 @@ def like_post(post_id):
     return jsonify(post), 200
 
 
+@app.route('/api/posts/<int:post_id>/comment', methods=['POST'])
+def add_comment(post_id):
+    post = fetch_post_by_id(post_id)
+    comment = request.get_json()
+    if 'comments' not in post:
+        post['comments'] = []
+    if comment.get('comment').strip():
+        post['comments'].append(comment['comment'])
+        database.update_storage_file(database.posts)
+        return jsonify(comment), 201
+    else:
+        return jsonify({'error': 'Bad request: expected key comment with non-empty value'}), 400
+
+
+
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=5002, debug=True)

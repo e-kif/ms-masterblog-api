@@ -35,7 +35,9 @@ body {
 
 .input-field .inputs>input,
 .input-field button,
-.title-author>input {
+.title-author>input,
+.comment-form textarea,
+.comment-form button {
     height: 40px;
     padding: 10px;
     font-size: 16px;
@@ -56,13 +58,13 @@ body {
     color: #aaa;
 }
 
-.input-field button {
+.input-field button, .comment-form button {
     background-color: #4466ee;
     color: #fff;
     cursor: pointer;
 }
 
-.input-field button:hover {
+.input-field button:hover, .comment-form button:hover {
     background-color: #3355dd;
 }
 
@@ -165,6 +167,47 @@ body {
     box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
 }
 
+
+.comments {
+    display: grid;
+    grid-template-columns: 1fr;
+}
+
+.comment {
+    padding: 12px;
+    background-color: #feffd6;
+    border-radius: 8px;
+    margin-bottom: 8px;
+}
+
+.comment-form {
+    margin-bottom: 24px;
+    display: grid;
+    grid-template-columns: 1fr;
+    justify-items: center;
+    justify-self: center;
+    width: 80%;
+    row-gap: 12px;
+}
+
+.comment-form textarea {
+    width: 85%;
+    min-height: 80px;
+}
+
+.comment-form button {
+    max-width: 200px;
+}
+
+.hidden {
+    display: none;
+}
+
+
+
+
+
+/************ media query **************/
 
 @media screen and (max-width: 900px) {
 .input-field {

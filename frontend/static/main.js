@@ -31,14 +31,11 @@ function loadPosts() {
         for (i=0; i<searchKeys.length; i++){
             current_id = searchKeys[i].id
             params.push(current_id + "=" + document.getElementById(current_id + '-value').value)
-
         }
-
         query += params.join('&')
         console.log(query)
     }
 
-    console.log(query)
     // Use the Fetch API to send a GET request to the /posts endpoint
     fetch(baseUrl + '/posts' + query)
         .then(response => response.json())  // Parse the JSON data from the response
@@ -50,8 +47,9 @@ function loadPosts() {
             // For each post in the response, create a new post element and add it to the page
             data.forEach(post => {
                 const postDiv = document.createElement('div');
-                if (post.likes == undefined) {post.likes = 0};
                 postDiv.className = 'post';
+                if (post.likes == undefined) {post.likes = 0};
+                if (post.comments == undefined) {post.comments = []};
                 postDiv.innerHTML = `
                 <div class="post-info">
                     <h2 title="Post id ${post.id}">${post.title}</h2>
@@ -61,10 +59,39 @@ function loadPosts() {
                 </div>
                 <div class="post-buttons">
                     <button onclick="deletePost(${post.id})">Delete</button>
-                    <p class="likes">${post.likes} <span class="emoji" onclick="likePost(${post.id})">👍</span></p>
+                    <p class="likes">${post.likes} <span class="emoji" title="Add one like" onclick="likePost(${post.id})">👍</span></p>
+                    <p class="post-comments">${post.comments.length} <span class="emoji" title="View comments" onclick="toggleComments(${post.id})">🗨️</span></p>
                 </div>
                 `;
                 postContainer.appendChild(postDiv);
+
+
+                const commentsContainer = document.createElement('div');
+                commentsContainer.className = 'comments hidden';
+                commentsContainer.id = 'comments-' + post.id;
+                commentsContainer.innerHTML = '';
+                if (post.comments !== undefined){
+                    post.comments.forEach(comment => {
+                        const commentDiv = document.createElement('div');
+                        commentDiv.className = 'comment';
+                        commentDiv.innerHTML = `
+                    <p class="comment-text">${comment}</p>
+                        `;
+                        commentsContainer.appendChild(commentDiv);
+                    });
+
+                }
+
+                commentsContainer.innerHTML +=`
+                <div class="comment-form">
+                <textarea name="comment" id="new-comment-${post.id}" placeholder="Enter your comment"></textarea>
+                <button onclick="addComment(${post.id})">Submit Comment</button>
+                </div>
+
+                `
+                postContainer.appendChild(commentsContainer);
+                
+
             });
         })
         .catch(error => console.error('Error:', error));  // If an error occurs, log it to the console
@@ -119,10 +146,35 @@ function likePost(postId) {
     .catch(error => console.error('Error:', error));
 }
 
+
+function addComment(postId) {
+    var baseUrl = document.getElementById('api-base-url').value
+    var commentContent = document.getElementById('new-comment-' + postId).value;
+
+    fetch(baseUrl + '/posts/' + postId + '/comment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ comment: commentContent })
+    })
+    .then(response => response.json())  // Parse the JSON data from the response
+    .then(post => {
+        console.log('Comment added:', commentContent);
+        loadPosts(); // Reload the posts after adding a new one
+    })
+    .catch(error => console.error('Error:', error));  // If an error occurs, log it to the console
+
+}
+
+
 function loadParamToggle(elemId) {
     if (document.getElementById(elemId).checked) {
         document.getElementsByClassName('search-params')[0].style.display = 'none';
         document.getElementsByClassName('sort-params')[0].style.display = 'none';
         document.getElementsByClassName(elemId + '-params')[0].style.display = 'grid';
     }
+}
+
+function toggleComments(elemId) {
+    document.getElementById('comments-' + elemId).classList.toggle('hidden')
+    
 }
