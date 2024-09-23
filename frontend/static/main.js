@@ -44,6 +44,7 @@ function loadPosts() {
             const postContainer = document.getElementById('post-container');
             postContainer.innerHTML = '';
 
+
             // For each post in the response, create a new post element and add it to the page
             data.forEach(post => {
                 const postDiv = document.createElement('div');
@@ -65,11 +66,13 @@ function loadPosts() {
                 `;
                 postContainer.appendChild(postDiv);
 
-
+                // Create container for comments section
                 const commentsContainer = document.createElement('div');
                 commentsContainer.className = 'comments hidden';
                 commentsContainer.id = 'comments-' + post.id;
                 commentsContainer.innerHTML = '';
+                
+                // For each post, that has comments, create and populate corresponding comment div
                 if (post.comments !== undefined){
                     post.comments.forEach(comment => {
                         const commentDiv = document.createElement('div');
@@ -82,6 +85,7 @@ function loadPosts() {
 
                 }
 
+                // Add comment form
                 commentsContainer.innerHTML +=`
                 <div class="comment-form">
                 <textarea name="comment" id="new-comment-${post.id}" placeholder="Enter your comment"></textarea>
@@ -90,12 +94,11 @@ function loadPosts() {
 
                 `
                 postContainer.appendChild(commentsContainer);
-                
-
             });
         })
         .catch(error => console.error('Error:', error));  // If an error occurs, log it to the console
 }
+
 
 // Function to send a POST request to the API to add a new post
 function addPost() {
@@ -147,6 +150,7 @@ function likePost(postId) {
 }
 
 
+// Function adds a comment by sending a POST request to a post's endpoint
 function addComment(postId) {
     var baseUrl = document.getElementById('api-base-url').value
     var commentContent = document.getElementById('new-comment-' + postId).value;
@@ -165,7 +169,7 @@ function addComment(postId) {
 
 }
 
-
+// Function switches parameters of load function between 'sort' and 'search'
 function loadParamToggle(elemId) {
     if (document.getElementById(elemId).checked) {
         document.getElementsByClassName('search-params')[0].style.display = 'none';
@@ -174,6 +178,7 @@ function loadParamToggle(elemId) {
     }
 }
 
+// Function toogles visibility of comments section
 function toggleComments(elemId) {
     document.getElementById('comments-' + elemId).classList.toggle('hidden')
     
