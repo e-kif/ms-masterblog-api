@@ -110,6 +110,7 @@ def get_posts():
 
 
 def get_sort_item(sort_key, item):
+    """Returns a string or an integer for key parameter of sorted function depending on input item's type"""
     if sort_key == 'date':
         return convert_date_string_into_datetime(item[sort_key])
     if isinstance(item.get(sort_key), str):
