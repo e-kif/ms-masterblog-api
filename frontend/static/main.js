@@ -120,6 +120,9 @@ function addPost() {
         loadPosts(); // Reload the posts after adding a new one
     })
     .catch(error => console.error('Error:', error));  // If an error occurs, log it to the console
+    document.getElementById('post-title').value = "";
+    document.getElementById('post-author').value = "";
+    document.getElementById('post-content').value = "";
 }
 
 // Function to send a DELETE request to the API to delete a post
