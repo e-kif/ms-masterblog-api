@@ -102,10 +102,10 @@ function loadPosts() {
                 <div class="input-field">
                     <div class="inputs">
                     <div class="title-author">
-                        <input type="text" id="upd-post-title" placeholder="Enter Post Title" value="${post.title}">
-                        <input type="text" id="upd-post-author" placeholder="Enter Post Author" value="${post.author}">
+                        <input type="text" id="upd-post-title-${post.id}" placeholder="Enter Post Title" value="${post.title}">
+                        <input type="text" id="upd-post-author-${post.id}" placeholder="Enter Post Author" value="${post.author}">
                     </div>
-                    <input type="text" id="upd-post-content" placeholder="Enter Post Content" value="${post.content}">
+                    <input type="text" id="upd-post-content-${post.id}" placeholder="Enter Post Content" value="${post.content}">
                     </div>
                     <button title="Update post" onclick="updatePost(${post.id})">Update</button>
                 </div>`;
@@ -160,11 +160,9 @@ function deletePost(postId) {
 // Function to send a PUT request to the API
 function updatePost(postId){
     var baseUrl = document.getElementById('api-base-url').value;
-
-
-    var postTitle = document.getElementById('upd-post-title').value;
-    var postContent = document.getElementById('upd-post-content').value;
-    var postAuthor = document.getElementById('upd-post-author').value;
+    var postTitle = document.getElementById('upd-post-title-' + postId).value;
+    var postContent = document.getElementById('upd-post-content-' + postId).value;
+    var postAuthor = document.getElementById('upd-post-author-' + postId).value;
 
     // Use the Fetch API to send a PUT request to the /posts endpoint
     fetch(baseUrl + '/posts/' + postId, {
