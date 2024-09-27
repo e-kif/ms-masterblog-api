@@ -60,7 +60,7 @@ function loadPosts() {
                 </div>
                 <div class="post-buttons">
                     <button title="Delete post" onclick="deletePost(${post.id})">Delete</button>
-                    <button title="Edit post" onclick="editPost(${post.id})">Edit</button>
+                    <button title="Show edit post form" onclick="toggleHidden('update-${post.id}')">Edit</button>
                     <p class="likes">${post.likes} <span class="emoji" title="Add one like" onclick="likePost(${post.id})">👍</span></p>
                     <p class="post-comments">${post.comments.length} <span class="emoji" title="View comments" onclick="toggleComments(${post.id})">🗨️</span></p>
                 </div>
@@ -102,6 +102,20 @@ function loadPosts() {
                 const updateContainer = document.createElement('div');
                 updateContainer.className = 'update-form hidden';
                 updateContainer.id = 'update-' + post.id;
+                updateContainer.innerHTML = `
+                <div class="input-field">
+                    <div class="inputs">
+                    <div class="title-author">
+                        <input type="text" id="upd-post-title" placeholder="Enter Post Title" value="${post.title}">
+                        <input type="text" id="upd-post-author" placeholder="Enter Post Author" value="${post.author}">
+                    </div>
+                    <input type="text" id="upd-post-content" placeholder="Enter Post Content" value="${post.content}">
+                    </div>
+                    <button title="Update post" onclick="updatePost()">Update</button>
+                </div>
+                `;
+
+                postContainer.appendChild(updateContainer);
 
             });
         })
@@ -194,4 +208,13 @@ function loadParamToggle(elemId) {
 function toggleComments(elemId) {
     document.getElementById('comments-' + elemId).classList.toggle('hidden')
     
+}
+
+function toggleHidden(elemId) {
+    document.getElementById(elemId).classList.toggle('hidden')
+}
+
+
+function toggleEditPost(elemId){
+    document.getElementById('update-' + elemId).clssList.toggle('hidden')
 }
