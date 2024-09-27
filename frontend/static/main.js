@@ -59,7 +59,8 @@ function loadPosts() {
                     <p>${post.content}</p>
                 </div>
                 <div class="post-buttons">
-                    <button onclick="deletePost(${post.id})">Delete</button>
+                    <button title="Delete post" onclick="deletePost(${post.id})">Delete</button>
+                    <button title="Edit post" onclick="editPost(${post.id})">Edit</button>
                     <p class="likes">${post.likes} <span class="emoji" title="Add one like" onclick="likePost(${post.id})">👍</span></p>
                     <p class="post-comments">${post.comments.length} <span class="emoji" title="View comments" onclick="toggleComments(${post.id})">🗨️</span></p>
                 </div>
@@ -94,6 +95,14 @@ function loadPosts() {
 
                 `
                 postContainer.appendChild(commentsContainer);
+
+
+
+                // Add update form
+                const updateContainer = document.createElement('div');
+                updateContainer.className = 'update-form hidden';
+                updateContainer.id = 'update-' + post.id;
+
             });
         })
         .catch(error => console.error('Error:', error));  // If an error occurs, log it to the console
