@@ -62,7 +62,7 @@ function loadPosts() {
                     <button title="Delete post" onclick="deletePost(${post.id})">Delete</button>
                     <button title="Show edit post form" onclick="toggleHidden('update-${post.id}')">Edit</button>
                     <p class="likes">${post.likes} <span class="emoji" title="Add one like" onclick="likePost(${post.id})">👍</span></p>
-                    <p class="post-comments">${post.comments.length} <span class="emoji" title="View comments" onclick="toggleComments(${post.id})">🗨️</span></p>
+                    <p class="post-comments">${post.comments.length} <span class="emoji" title="View comments" onclick="toggleHidden('comments-${post.id}')">🗨️</span></p>
                 </div>
                 `;
                 postContainer.appendChild(postDiv);
@@ -91,12 +91,8 @@ function loadPosts() {
                 <div class="comment-form">
                 <textarea name="comment" id="new-comment-${post.id}" placeholder="Enter your comment"></textarea>
                 <button onclick="addComment(${post.id})">Submit Comment</button>
-                </div>
-
-                `
+                </div>`;
                 postContainer.appendChild(commentsContainer);
-
-
 
                 // Add update form
                 const updateContainer = document.createElement('div');
@@ -111,12 +107,9 @@ function loadPosts() {
                     </div>
                     <input type="text" id="upd-post-content" placeholder="Enter Post Content" value="${post.content}">
                     </div>
-                    <button title="Update post" onclick="updatePost()">Update</button>
-                </div>
-                `;
-
+                    <button title="Update post" onclick="updatePost(${post.id})">Update</button>
+                </div>`;
                 postContainer.appendChild(updateContainer);
-
             });
         })
         .catch(error => console.error('Error:', error));  // If an error occurs, log it to the console
@@ -164,6 +157,30 @@ function deletePost(postId) {
 }
 
 
+// Function to send a PUT request to the API
+function updatePost(postId){
+    var baseUrl = document.getElementById('api-base-url').value;
+
+
+    var postTitle = document.getElementById('upd-post-title').value;
+    var postContent = document.getElementById('upd-post-content').value;
+    var postAuthor = document.getElementById('upd-post-author').value;
+
+    // Use the Fetch API to send a PUT request to the /posts endpoint
+    fetch(baseUrl + '/posts/' + postId, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: postTitle, content: postContent, author: postAuthor })
+    })
+    .then(response => response.json())  // Parse the JSON data from the response
+    .then(post => {
+        console.log('Post updated:', post);
+        loadPosts(); // Reload the posts after adding a new one
+    })
+    .catch(error => console.error('Error:', error));  // If an error occurs, log it to the console
+    loadPosts();
+}
+
 // Function to send a GET request to the specific post's like endpoint
 function likePost(postId) {
     var baseUrl = document.getElementById('api-base-url').value
@@ -204,17 +221,7 @@ function loadParamToggle(elemId) {
     }
 }
 
-// Function toogles visibility of comments section
-function toggleComments(elemId) {
-    document.getElementById('comments-' + elemId).classList.toggle('hidden')
-    
-}
-
+// Function toogles visibility of a div with elemId id
 function toggleHidden(elemId) {
     document.getElementById(elemId).classList.toggle('hidden')
-}
-
-
-function toggleEditPost(elemId){
-    document.getElementById('update-' + elemId).clssList.toggle('hidden')
 }
